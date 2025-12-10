@@ -6,6 +6,9 @@ import { formatCurrency, cn } from './lib/utils';
 import { ArrowUpCircle, ArrowDownCircle, Wallet } from 'lucide-react';
 import { IncomeExpenseChart } from './components/dashboard/IncomeExpenseChart';
 import { CategoryChart } from './components/dashboard/CategoryChart';
+import { InsightsBlock } from './components/dashboard/InsightsBlock';
+import { ScenarioSimulator } from './components/dashboard/ScenarioSimulator';
+import { Percent } from 'lucide-react';
 
 function App() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -26,16 +29,17 @@ function App() {
       .filter(t => t.type === 'Expense')
       .reduce((sum, t) => sum + t.amount, 0);
     const net = income - expense;
-    return { income, expense, net };
+    const margin = income > 0 ? ((net / income) * 100) : 0;
+    return { income, expense, net, margin };
   }, [transactions]);
 
   if (transactions.length === 0) {
     return (
       <div className="min-h-screen bg-slate-900 p-8 flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold text-slate-50 mb-2">Financial Dashboard</h1>
-        <p className="text-slate-400 mb-8">Upload your bank statement to visualize your finances</p>
+        <h1 className="text-4xl font-bold text-slate-50 mb-2">Panel Financiero</h1>
+        <p className="text-slate-400 mb-8">Sube tu resumen bancario para visualizar tus finanzas</p>
         <FileUpload onFileSelect={handleFileSelect} />
-        {isProcessing && <p className="text-slate-400 mt-4 animate-pulse">Processing...</p>}
+        {isProcessing && <p className="text-slate-400 mt-4 animate-pulse">Procesando...</p>}
       </div>
     );
   }
@@ -43,24 +47,24 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-900 p-6 md:p-8">
       <header className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-slate-50">Financial Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-50">Panel Financiero</h1>
         <button
           onClick={() => setTransactions([])}
           className="text-sm text-slate-400 hover:text-white transition-colors"
         >
-          Upload New File
+          Subir Nuevo Archivo
         </button>
       </header>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card className="p-6">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-slate-900/50 rounded-full text-neon-green">
               <ArrowUpCircle className="w-8 h-8" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Total Income</p>
+              <p className="text-sm text-slate-400">Ingresos Totales</p>
               <h2 className="text-2xl font-bold text-neon-green">{formatCurrency(summary.income)}</h2>
             </div>
           </div>
@@ -72,7 +76,7 @@ function App() {
               <ArrowDownCircle className="w-8 h-8" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Total Expenses</p>
+              <p className="text-sm text-slate-400">Gastos Totales</p>
               <h2 className="text-2xl font-bold text-neon-red">{formatCurrency(summary.expense)}</h2>
             </div>
           </div>
@@ -84,14 +88,30 @@ function App() {
               <Wallet className="w-8 h-8" />
             </div>
             <div>
-              <p className="text-sm text-slate-400">Net Balance</p>
+              <p className="text-sm text-slate-400">Balance Neto</p>
               <h2 className={cn("text-2xl font-bold", summary.net >= 0 ? "text-neon-green" : "text-neon-red")}>
                 {formatCurrency(summary.net)}
               </h2>
             </div>
           </div>
         </Card>
+        <Card className="p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-slate-900/50 rounded-full text-purple-400">
+              <Percent className="w-8 h-8" />
+            </div>
+            <div>
+              <p className="text-sm text-slate-400">Margen de Beneficio</p>
+              <h2 className={cn("text-2xl font-bold", summary.margin >= 0 ? "text-neon-green" : "text-neon-red")}>
+                {summary.margin.toFixed(1)}%
+              </h2>
+            </div>
+          </div>
+        </Card>
       </div>
+
+      {/* Insights Block */}
+      <InsightsBlock transactions={transactions} />
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -101,16 +121,16 @@ function App() {
 
       {/* Transactions Table */}
       <Card className="p-6">
-        <h3 className="text-xl font-bold text-slate-50 mb-4">Recent Transactions</h3>
+        <h3 className="text-xl font-bold text-slate-50 mb-4">Transacciones Recientes</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-400">
             <thead className="text-xs uppercase bg-slate-900/50 text-slate-300">
               <tr>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3">Description</th>
-                <th className="px-4 py-3">Category</th>
-                <th className="px-4 py-3 text-right">Amount</th>
-                <th className="px-4 py-3 text-center">Type</th>
+                <th className="px-4 py-3">Fecha</th>
+                <th className="px-4 py-3">Descripción</th>
+                <th className="px-4 py-3">Categoría</th>
+                <th className="px-4 py-3 text-right">Monto</th>
+                <th className="px-4 py-3 text-center">Tipo</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
@@ -133,7 +153,10 @@ function App() {
           </table>
         </div>
       </Card>
-    </div>
+
+      {/* Scenario Simulator */}
+      <ScenarioSimulator currentIncome={summary.income} currentExpense={summary.expense} />
+    </div >
   );
 }
 

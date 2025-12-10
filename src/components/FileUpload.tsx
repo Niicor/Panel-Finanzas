@@ -28,7 +28,7 @@ export function FileUpload({ onFileSelect }: FileUploadProps) {
         if (file && (file.type === 'text/csv' || file.name.endsWith('.csv'))) {
             onFileSelect(file)
         } else {
-            alert('Please upload a valid CSV file.')
+            alert('Por favor sube un archivo CSV válido.')
         }
     }, [onFileSelect])
 
@@ -62,11 +62,11 @@ export function FileUpload({ onFileSelect }: FileUploadProps) {
                 <Upload className={cn("w-8 h-8", isDragOver ? "text-neon-green" : "text-slate-400")} />
             </div>
 
-            <h3 className="text-xl font-bold mb-2 text-slate-50">Upload Financial Data</h3>
+            <h3 className="text-xl font-bold mb-2 text-slate-50">Subir Datos Financieros</h3>
             <p className="text-slate-400 text-center mb-6">
-                Drag and drop your CSV file here, or click to browse.
+                Arrastra y suelta tu archivo CSV aquí, o haz clic para buscar.
                 <br />
-                <span className="text-sm text-slate-500">Supports text/csv</span>
+                <span className="text-sm text-slate-500">Soporta text/csv</span>
             </p>
         </Card>
     )

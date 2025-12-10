@@ -31,8 +31,8 @@ export const parseCSV = (file: File): Promise<ParseResult> => {
                     }, {} as any);
 
                     const date = normalizedRow['date'] || normalizedRow['fecha'];
-                    const description = normalizedRow['description'] || normalizedRow['descripción'] || normalizedRow['memo'];
-                    const category = normalizedRow['category'] || normalizedRow['categoría'] || 'Uncategorized';
+                    const description = normalizedRow['description'] || normalizedRow['descripcion'] || normalizedRow['memo'];
+                    const category = normalizedRow['category'] || normalizedRow['categoria'] || 'Sin Categoría';
                     const amountStr = normalizedRow['amount'] || normalizedRow['monto'] || '0';
                     const typeRaw = normalizedRow['type'] || normalizedRow['tipo'];
 
@@ -69,7 +69,7 @@ export const parseCSV = (file: File): Promise<ParseResult> => {
                     transactions.push({
                         id: `txn-${index}-${Date.now()}`,
                         date,
-                        description: description || 'No Description',
+                        description: description || 'Sin Descripción',
                         category,
                         amount,
                         type

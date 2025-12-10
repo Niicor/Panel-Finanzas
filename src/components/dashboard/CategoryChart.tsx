@@ -16,7 +16,7 @@ export function CategoryChart({ transactions }: CategoryChartProps) {
 
     return (
         <Card className="p-6 min-h-[400px]">
-            <h3 className="text-xl font-bold text-slate-50 mb-6">Expenses by Category</h3>
+            <h3 className="text-xl font-bold text-slate-50 mb-6">Gastos por Categoría</h3>
             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>

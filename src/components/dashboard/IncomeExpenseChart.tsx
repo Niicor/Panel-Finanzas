@@ -14,7 +14,7 @@ export function IncomeExpenseChart({ transactions }: IncomeExpenseChartProps) {
 
     return (
         <Card className="p-6 col-span-2 min-h-[400px]">
-            <h3 className="text-xl font-bold text-slate-50 mb-6">Income vs Expenses</h3>
+            <h3 className="text-xl font-bold text-slate-50 mb-6">Ingresos vs Gastos</h3>
             <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -56,7 +56,7 @@ export function IncomeExpenseChart({ transactions }: IncomeExpenseChartProps) {
                             strokeWidth={2}
                             fillOpacity={1}
                             fill="url(#colorIncome)"
-                            name="Income"
+                            name="Ingresos"
                         />
                         <Area
                             type="monotone"
@@ -65,7 +65,7 @@ export function IncomeExpenseChart({ transactions }: IncomeExpenseChartProps) {
                             strokeWidth={2}
                             fillOpacity={1}
                             fill="url(#colorExpense)"
-                            name="Expense"
+                            name="Gastos"
                         />
                     </AreaChart>
                 </ResponsiveContainer>

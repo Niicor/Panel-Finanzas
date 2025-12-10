@@ -46,3 +46,45 @@ export const aggregateCategoryData = (transactions: Transaction[]) => {
         .map(([name, value]) => ({ name, value }))
         .sort((a, b) => b.value - a.value);
 };
+
+export const getBestMonth = (transactions: Transaction[]) => {
+    const map = new Map<string, number>();
+
+    transactions.forEach(t => {
+        let dateKey = t.date;
+        try {
+            const d = new Date(t.date);
+            if (!isNaN(d.getTime())) {
+                const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                ];
+                dateKey = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        if (!map.has(dateKey)) map.set(dateKey, 0);
+
+        const current = map.get(dateKey)!;
+        if (t.type === 'Income') map.set(dateKey, current + t.amount);
+        else map.set(dateKey, current - t.amount);
+    });
+
+    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+    return sorted.length > 0 ? { month: sorted[0][0], amount: sorted[0][1] } : null;
+};
+
+export const getMostProfitableCategory = (transactions: Transaction[]) => {
+    const map = new Map<string, number>();
+
+    transactions
+        .filter(t => t.type === 'Income')
+        .forEach(t => {
+            const cat = t.category;
+            map.set(cat, (map.get(cat) || 0) + t.amount);
+        });
+
+    const sorted = Array.from(map.entries()).sort((a, b) => b[1] - a[1]);
+    return sorted.length > 0 ? { category: sorted[0][0], amount: sorted[0][1] } : null;
+};
