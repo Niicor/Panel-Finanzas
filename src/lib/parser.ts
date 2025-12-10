@@ -14,7 +14,34 @@ export interface ParseResult {
     errors: string[];
 }
 
-export const parseCSV = (file: File): Promise<ParseResult> => {
+export interface ColumnMapping {
+    date: string;
+    description: string;
+    category: string;
+    amount: string;
+    type: string;
+}
+
+export const getCSVHeaders = (file: File): Promise<string[]> => {
+    return new Promise((resolve) => {
+        Papa.parse(file, {
+            header: true,
+            preview: 1,
+            step: (results) => {
+                if (results.meta.fields) {
+                    resolve(results.meta.fields);
+                } else {
+                    resolve([]);
+                }
+            },
+            complete: () => {
+                // In case step isn't called for empty file
+            }
+        });
+    });
+};
+
+export const parseCSV = (file: File, mapping?: ColumnMapping): Promise<ParseResult> => {
     return new Promise((resolve) => {
         Papa.parse(file, {
             header: true,
@@ -24,17 +51,27 @@ export const parseCSV = (file: File): Promise<ParseResult> => {
                 const errors: string[] = [];
 
                 results.data.forEach((row: any, index) => {
-                    // Normalize keys to lowercase for flexible matching
-                    const normalizedRow = Object.keys(row).reduce((acc, key) => {
+                    // Normalize keys to lowercase for flexible matching ONLY if no mapping provided
+                    const normalizedRow = mapping ? row : Object.keys(row).reduce((acc, key) => {
                         acc[key.toLowerCase().trim()] = row[key];
                         return acc;
                     }, {} as any);
 
-                    const date = normalizedRow['date'] || normalizedRow['fecha'];
-                    const description = normalizedRow['description'] || normalizedRow['descripcion'] || normalizedRow['memo'];
-                    const category = normalizedRow['category'] || normalizedRow['categoria'] || 'Sin Categoría';
-                    const amountStr = normalizedRow['amount'] || normalizedRow['monto'] || '0';
-                    const typeRaw = normalizedRow['type'] || normalizedRow['tipo'];
+                    let date, description, category, amountStr, typeRaw;
+
+                    if (mapping) {
+                        date = row[mapping.date];
+                        description = row[mapping.description];
+                        category = row[mapping.category];
+                        amountStr = row[mapping.amount];
+                        typeRaw = row[mapping.type];
+                    } else {
+                        date = normalizedRow['date'] || normalizedRow['fecha'];
+                        description = normalizedRow['description'] || normalizedRow['descripcion'] || normalizedRow['descripción'] || normalizedRow['memo'];
+                        category = normalizedRow['category'] || normalizedRow['categoria'] || 'Sin Categoría';
+                        amountStr = normalizedRow['amount'] || normalizedRow['monto'] || '0';
+                        typeRaw = normalizedRow['type'] || normalizedRow['tipo'];
+                    }
 
                     if (!date || !amountStr) {
                         // Skip invalid rows but maybe log?
@@ -45,7 +82,7 @@ export const parseCSV = (file: File): Promise<ParseResult> => {
                     let type: 'Income' | 'Expense' = 'Expense';
 
                     if (typeRaw) {
-                        const t = typeRaw.toLowerCase();
+                        const t = typeRaw.toString().toLowerCase();
                         if (t === 'income' || t === 'ingreso' || t === 'credit') type = 'Income';
                         else type = 'Expense';
                     } else {
@@ -53,12 +90,7 @@ export const parseCSV = (file: File): Promise<ParseResult> => {
                         if (amount >= 0) type = 'Income';
                         else {
                             type = 'Expense';
-                            amount = Math.abs(amount); // Normalizing expense to positive number usually? 
-                            // Wait, requirements say: "Values of Expense/Negative: Neon Red". 
-                            // If I store expense as positive but label it Expense, it's easier for charts usually.
-                            // But user logic: "If Type missing, infer from sign (positive = Income, negative = Expense)".
-                            // So original amount might be negative. 
-                            // I will store absolute amount and use Type to distinguish.
+                            amount = Math.abs(amount);
                         }
                     }
 
@@ -70,7 +102,7 @@ export const parseCSV = (file: File): Promise<ParseResult> => {
                         id: `txn-${index}-${Date.now()}`,
                         date,
                         description: description || 'Sin Descripción',
-                        category,
+                        category: category || 'Sin Categoría',
                         amount,
                         type
                     });
