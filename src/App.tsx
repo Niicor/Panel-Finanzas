@@ -9,10 +9,12 @@ import { CategoryChart } from './components/dashboard/CategoryChart';
 import { InsightsBlock } from './components/dashboard/InsightsBlock';
 import { ScenarioSimulator } from './components/dashboard/ScenarioSimulator';
 import { Percent } from 'lucide-react';
+import { LandingPage } from './components/LandingPage';
 import { ColumnMapper } from './components/ColumnMapper';
 import { getCSVHeaders, type ColumnMapping } from './lib/parser';
 
 function App() {
+  const [showLanding, setShowLanding] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [fileToMap, setFileToMap] = useState<File | null>(null);
@@ -47,6 +49,10 @@ function App() {
     const margin = income > 0 ? ((net / income) * 100) : 0;
     return { income, expense, net, margin };
   }, [transactions]);
+
+  if (showLanding) {
+    return <LandingPage onStart={() => setShowLanding(false)} />;
+  }
 
   if (transactions.length === 0) {
     return (
