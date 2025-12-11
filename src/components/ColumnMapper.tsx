@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from './ui/Card';
 import { type ColumnMapping } from '../lib/parser';
-import { ArrowRight, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface ColumnMapperProps {
